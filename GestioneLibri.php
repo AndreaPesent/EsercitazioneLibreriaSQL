@@ -12,15 +12,15 @@ if(isset($_POST['salva_prestito'])){
     $libro = $_POST['libro'];
     $utente = $_POST['utente'];
 
-    mysqli_query($conn, "INSERT INTO prestiti (id_libro, id_utente, data_prestito)
-                         VALUES ($libro, $utente, CURDATE())");
+    mysqli_query($conn, "INSERT INTO prestiti (id_libro, id_utente, data_prestito, data_inizio, data_fine_prevista, restituito)
+                         VALUES ($libro, $utente);
 }
 if(isset($_GET['restituisci'])){
     $id = $_GET['restituisci'];
 
     mysqli_query($conn, "UPDATE prestiti
-                        SET data_restituzione = CURDATE()
-                        WHERE id = $id");
+                     SET restituito = 1
+                     WHERE id_prestito = $id");
 }
 ?>
 <h2>Inserisci Libro</h2>
@@ -30,14 +30,14 @@ if(isset($_GET['restituisci'])){
     <select name="autore">
         <?php
         $res = mysqli_query($conn, "SELECT * FROM autori");
-        while($row = mysqli_fetch_assoc($res)){
-            echo "<option value='".$row['id']."'>".$row['nome']."</option>";
-        }
+        while($row = mysqli_fetch_assoc($res))
+            {
+                echo "<option value='".$row['id_autore']."'>".$row['nome']."</option>";
+            }
         ?>
     </select>
     <button name="salva_libro">Salva</button>
 </form>
-<hr>
 <h2>Inserisci Prestito</h2>
 <form method="post">
 Libro:
@@ -45,7 +45,7 @@ Libro:
 <?php
 $res = mysqli_query($conn, "SELECT * FROM libri");
 while($row = mysqli_fetch_assoc($res)){
-    echo "<option value='".$row['id']."'>".$row['titolo']."</option>";
+    echo "<option value='".$row['id_libro']."'>".$row['titolo']."</option>";
 }
 ?>
 </select>
@@ -60,7 +60,6 @@ while($row = mysqli_fetch_assoc($res)){
 </select>
 <button name="salva_prestito">Registra</button>
 </form>
-<hr>
 <h2>Prestiti per utente</h2>
 <form method="get">
 Utente:
@@ -68,7 +67,7 @@ Utente:
 <?php
 $res = mysqli_query($conn, "SELECT * FROM utenti");
 while($row = mysqli_fetch_assoc($res)){
-    echo "<option value='".$row['id']."'>".$row['nome']."</option>";
+    echo "<option value='".$row['id_utente']."'>".$row['nome']."</option>";
 }
 ?>
 </select>
@@ -79,22 +78,23 @@ if(isset($_GET['utente']))
     {
     $utente = $_GET['utente'];
     $res = mysqli_query($conn, "
-        SELECT prestiti.id, libri.titolo, data_restituzione
-        FROM prestiti
-        JOIN libri ON prestiti.id_libro = libri.id
-        WHERE id_utente = $utente
+    SELECT prestiti.id_prestito, libri.titolo, prestiti.restituito
+    FROM prestiti
+    JOIN libri ON prestiti.id_libro = libri.id_libro
+    WHERE id_utente = $utente
     ");
     echo "<h3>Libri:</h3>";
     while($row = mysqli_fetch_assoc($res))
-        {
+    {
         echo $row['titolo'];
-        if($row['data_restituzione'] == NULL){
-            echo " <a href='?restituisci=".$row['id']."'>Restituisci</a>";
-        } else 
+    if($row['restituito'] == 0)
         {
-            echo " (restituito)";
-        }
-        echo "<br>";
+        echo " <a href='?restituisci=".$row['id_prestito']."'>Restituisci</a>";
+    } else 
+    {
+        echo " (restituito)";
     }
+    echo "<br>";
+}
 }
 ?>

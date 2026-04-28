@@ -12,8 +12,8 @@ if(isset($_POST['salva_prestito'])){
     $libro = $_POST['libro'];
     $utente = $_POST['utente'];
 
-    mysqli_query($conn, "INSERT INTO prestiti (id_libro, id_utente, data_prestito, data_inizio, data_fine_prevista, restituito)
-                         VALUES ($libro, $utente);
+    mysqli_query($conn, "INSERT INTO prestiti (id_libro, id_utente)
+                            VALUES ($libro, $utente)");
 }
 if(isset($_GET['restituisci'])){
     $id = $_GET['restituisci'];
@@ -54,7 +54,7 @@ Utente:
 <?php
 $res = mysqli_query($conn, "SELECT * FROM utenti");
 while($row = mysqli_fetch_assoc($res)){
-    echo "<option value='".$row['id']."'>".$row['nome']."</option>";
+    echo "<option value='".$row['id_utente']."'>".$row['nome']."</option>";
 }
 ?>
 </select>
